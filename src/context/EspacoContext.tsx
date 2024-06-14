@@ -1,6 +1,5 @@
 "use client";
 import { fetchWrapper } from "@/lib/fetch";
-import { get } from "http";
 import React, { createContext, useState, ReactNode, useContext, useEffect } from "react";
 
 interface ResponseData {
@@ -9,7 +8,6 @@ interface ResponseData {
   type: string;
   imageUrl?: string | null;
 }
-
 
 
 interface EspacoContextProps {
@@ -23,7 +21,7 @@ export const EspacoProvider = ({ children }: { children: ReactNode }) => {
   const getEspaco = async () => {
     try {
       const response = await fetchWrapper<ResponseData[]>("/api/coworking/get-coworkings");
-      setEspacos(response); // Concatenar arrays corretamente
+      setEspacos(response); 
     } catch (error) {
       console.error("Failed to fetch espacos:", error);
     }

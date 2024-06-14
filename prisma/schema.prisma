@@ -14,15 +14,16 @@ datasource db {
 }
 
 model User {
-  id         String    @id @default(uuid())
-  name       String
-  email      String    @unique
-  imageUrl   String?
+  id          String    @id @default(uuid())
+  name        String
+  email       String   
+  imageUrl    String?
+  startupName String?
+  phone       String?
   created_at DateTime  @default(now())
   updated_at DateTime?
-
-  @@map("users")
 }
+
 
 model Coworking {
   id         String    @id @default(uuid())

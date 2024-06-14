@@ -6,8 +6,8 @@ export default function Areas() {
    
     const hubs = [
         { id: 'hub-investe-piaui', name: 'Hub Investe Piauí' },
-        { id: 'hub-2', name: 'Hub 2' },
-        { id: 'hub-3', name: 'Hub 3' },
+        { id: 'TechNova', name: 'Hub 2' },
+        { id: 'hub-Agro', name: 'Hub 3' },
     ];
 
     return (

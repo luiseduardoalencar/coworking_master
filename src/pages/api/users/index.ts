@@ -1,10 +1,10 @@
 import { prisma } from '@/lib/prisma'
 import type { NextApiRequest, NextApiResponse } from 'next'
- 
+
 type ResponseData = {
-  message: string
+  id: string
 }
- 
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
@@ -13,14 +13,22 @@ export default async function handler(
     return res.status(405).end()
   }
 
-  const { name, email, imageUrl, } = req.body
-  await prisma.user.create({
+  
+  const { name, email, imageUrl, startupName, phone } = req.body
+
+
+  const result = await prisma.user.create({
+
     data: {
       name,
       email,
-      imageUrl
+      imageUrl,
+      startupName, 
+      phone       
+    },
+    select:{
+      id:true,
     }
   })
-
-  return res.status(201).json({ message: 'User created successfully' })
+  return res.status(201).json(result)
 }
