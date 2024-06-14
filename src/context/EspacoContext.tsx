@@ -23,7 +23,7 @@ export const EspacoProvider = ({ children }: { children: ReactNode }) => {
   const getEspaco = async () => {
     try {
       const response = await fetchWrapper<ResponseData[]>("/api/coworking/get-coworkings");
-      setEspacos(prev => [...prev, ...response]); // Concatenar arrays corretamente
+      setEspacos(response); // Concatenar arrays corretamente
     } catch (error) {
       console.error("Failed to fetch espacos:", error);
     }

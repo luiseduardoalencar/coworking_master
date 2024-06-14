@@ -15,8 +15,8 @@ export default async function handler(
   if (req.method !== 'GET') {
     return res.status(405).end()
   }
-  const  coworkingId  = req.query
-console.log(coworkingId);
+  const  coworkingId  = req.headers['coworkingid'] as string
+console.log(coworkingId, "GET SEATS");
 
   if (!coworkingId) {
     return res.status(400).end()
