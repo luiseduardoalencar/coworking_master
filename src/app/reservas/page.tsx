@@ -25,8 +25,8 @@ export default function ReservasDisponiveis() {
                                     boxShadow: '0 0 10px rgba(0,0,0,0.1)'
                                 }}
                             >
-                                <h2 style={{ margin: '10px 0' }}>{espaco}</h2>
-                                <Button variant="default" onClick={() => alert(`Reservar ${espaco}`)}>
+                                <h2 style={{ margin: '10px 0' }}>{espaco.name}</h2>
+                                <Button variant="default" onClick={() => alert(`Reservar ${espaco.name}`)}>
                                     Reservar
                                 </Button>
                             </div>
