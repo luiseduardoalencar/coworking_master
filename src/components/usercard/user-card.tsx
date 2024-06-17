@@ -24,7 +24,7 @@ const registrationSchema = z.object({
   startupName: z.string().min(1, { message: "Nome da Startup obrigatório" }),
   phone: z.string().min(1, { message: "Telefone obrigatório" }),
   email: z.string().email({ message: "Email inválido" }),
-  imageUrl: z.string().url({ message: "URL da Imagem inválida" }).optional(), 
+  imageUrl: z.string().optional(), 
 });
 
 type RegistrationSchema = z.infer<typeof registrationSchema>;
@@ -40,6 +40,8 @@ export function UserCard({ onClose }: UserCardProps) {
   });
 
   const handleRegisterUser = async (data: RegistrationSchema) => {
+    console.log(data);
+    
     const init: RequestInit = {
       method: "POST",
       headers: {

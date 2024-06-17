@@ -14,6 +14,7 @@ export default async function handler(
   }
   const  {seatOwner, busy, id}  = req.body
 
+console.log(seatOwner, busy, id, "PUT SEAT");
 
   await prisma.seat.update({
    where: {

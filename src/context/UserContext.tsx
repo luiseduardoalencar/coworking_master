@@ -7,9 +7,9 @@ interface ResponseData {
   id: string;
   name: string;
   email: string;
-  imageUrl?: string | null;
-  startupName?: string | null;
-  phone?: string | null;
+  imageUrl?: string;
+  startupName?: string;
+  phone?: string ;
 }
 
 interface UserContextProps {
