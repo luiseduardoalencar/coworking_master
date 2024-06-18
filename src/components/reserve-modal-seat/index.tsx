@@ -24,7 +24,9 @@ import { z } from "zod";
 import { fetchWrapper } from "@/lib/fetch";
 import { Switch } from "../ui/switch";
 import { useUser } from "@/context/UserContext";
-import { Calendar } from "../ui/calendar";
+import Datetime from 'react-datetime';
+import "react-datetime/css/react-datetime.css";
+import "@/components/reserve-modal-seat/datatime-custom.css"; 
 import { addDays, isBefore, parseISO } from "date-fns";
 
 
@@ -144,12 +146,14 @@ export function ReserveModalSeat({ onClose, seatId, coworkingId }: EspacoCardPro
                   <Label className="text-start mb-4" htmlFor="date">
                     Data da Reserva
                   </Label>
-                  <Calendar
-                    mode="single"
-                    selected={field.value ? parseISO(field.value) : today}
-                    onSelect={(date) => field.onChange(date ? date.toISOString() : '')}
-                    disabled={(date) => isBefore(date, today)} // Desabilita datas passadas
-                    className="rounded-md border"
+                  <Datetime
+                    value={field.value ? new Date(field.value) : today}
+                    onChange={(date) => field.onChange(date.toISOString())}
+                    dateFormat="DD/MM/YYYY"
+                    timeFormat="HH:mm"
+                    isValidDate={(current) => current.isAfter(today)}
+                    inputProps={{ placeholder: 'Selecione a data e hora' }}
+                    className="rd-container" // Adicionando a classe personalizada
                   />
                   {errors.bookingDate && (
                     <span>{errors.bookingDate.message}</span>

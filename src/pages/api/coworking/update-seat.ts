@@ -14,7 +14,16 @@ export default async function handler(
   }
   const  {seatOwnerId, coworkingId, bookingDate, busy, id}  = req.body
 // console.log(seatOwnerId, bookingDate, busy, id, 'PUT SEAT');
+const existingReservation = await prisma.reserve.findFirst({
+  where: {
+    seatId: String(id),
+    booking_date: String(bookingDate),
+  }
+});
 
+if (existingReservation) {
+  return res.status(400).json({ message: 'A reserva já existe para esta data e espaço' });
+}
   await prisma.seat.update({
    where: {
      id
