@@ -12,17 +12,24 @@ export default async function handler(
   if (req.method !== 'PUT') {
     return res.status(405).end()
   }
-  const  {seatOwner, busy, id}  = req.body
-
-console.log(seatOwner, busy, id, "PUT SEAT");
+  const  {seatOwnerId, coworkingId, bookingDate, busy, id}  = req.body
+// console.log(seatOwnerId, bookingDate, busy, id, 'PUT SEAT');
 
   await prisma.seat.update({
    where: {
      id
    }, data: {
-    seatOwner,
     busy
    }
+  })
+
+  await prisma.reserve.create({
+    data:{
+      seatId: String(id),
+      userId: String(seatOwnerId),
+      booking_date: String(bookingDate),
+      coworkingId
+    }
   })
 
 

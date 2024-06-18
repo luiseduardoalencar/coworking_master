@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { useEspaco } from '@/context/EspacoContext';
+import Link from 'next/link';
 
 export default function ReservasDisponiveis() {
     const { espacos } = useEspaco();
@@ -26,8 +27,8 @@ export default function ReservasDisponiveis() {
                                 }}
                             >
                                 <h2 style={{ margin: '10px 0' }}>{espaco.name}</h2>
-                                <Button variant="default" onClick={() => alert(`Reservar ${espaco.name}`)}>
-                                    Reservar
+                                <Button variant="default" >
+                                    <Link className='bg-transparent' href={`/reservas/${espaco.id}`}>Ver Reservas</Link>
                                 </Button>
                             </div>
                         ))}

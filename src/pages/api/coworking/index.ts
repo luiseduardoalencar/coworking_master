@@ -30,7 +30,8 @@ export default async function handler(
   for (let i = 1; i <= seat; i++) {
     await prisma.seat.create({
       data: {
-        coworkingId: result.id
+        coworkingId: result.id,
+        seatNumber: String(i),
       }
     })
   }

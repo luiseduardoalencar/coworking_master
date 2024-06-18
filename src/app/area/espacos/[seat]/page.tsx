@@ -4,6 +4,7 @@ import { ReserveModalSeat } from "@/components/reserve-modal-seat";
 import { Button } from "@/components/ui/button";
 import { fetchWrapper } from "@/lib/fetch";
 import { X } from "lucide-react";
+
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -12,7 +13,7 @@ interface Props {
 
 interface ResponseSeats {
     id: string
-    seatOwner?: string | null
+    seatNumber: string
     coworkingId: string 
     busy: boolean
   }
@@ -54,9 +55,9 @@ useEffect(() => {
         <div className="w-full text-center p-5">
         <h1>Espaços disponíveis</h1>
         <div className="  mt-16 grid grid-cols-2 sm:grid-cols-5 md:grid-cols-10 gap-2 justify-items-center">
-           {seats.map((seat, index) => (
+           {seats.map((seat) => (
                <Button onClick={() => handleAddClick(seat.id)} key={seat.id}  className="bg-transparent hover:bg-transparent"> 
-                    <div className={`w-7 h-7 flex items-center justify-center rounded-full ${seat.busy ? 'bg-blue-500' : 'bg-gray-100'}`}>{index}</div>
+                    <div className={`w-7 h-7 flex items-center justify-center rounded-full ${seat.busy ? 'bg-blue-500' : 'bg-gray-100'}`}>{seat.seatNumber}</div>
                </Button>
            ))}
         </div>
@@ -71,7 +72,7 @@ useEffect(() => {
                <X size={15} />
              </Button>
              <div className="w-full h-full flex items-center justify-center">
-               <ReserveModalSeat onClose={handleClose} seatId={selectedSeatId}  />
+               <ReserveModalSeat onClose={handleClose} seatId={selectedSeatId} coworkingId={params.seat }  />
              </div>
            </div>
          </div>

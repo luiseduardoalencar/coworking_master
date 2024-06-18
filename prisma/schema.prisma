@@ -22,6 +22,7 @@ model User {
   phone       String?
   created_at  DateTime  @default(now())
   updated_at  DateTime?
+  Reserve     Reserve[]
 }
 
 model Coworking {
@@ -33,18 +34,35 @@ model Coworking {
   created_at DateTime  @default(now())
   updated_at DateTime?
   Seat       Seat[]
+  Reserve    Reserve[]
 
   @@map("coworkings")
 }
 
 model Seat {
   id          String    @id @default(uuid())
-  seatOwner   String?
+  seatNumber  String
   busy        Boolean?  @default(false)
   coworking   Coworking @relation(fields: [coworkingId], references: [id])
   coworkingId String
   created_at  DateTime  @default(now())
   updated_at  DateTime?
+  Reserve     Reserve[]
 
   @@map("seats")
+}
+
+model Reserve {
+  id           String    @id @default(uuid())
+  booking_date DateTime
+  userId       String
+  seatId       String
+  coworkingId  String
+  created_at   DateTime  @default(now())
+  updated_at   DateTime?
+  seat         Seat      @relation(fields: [seatId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
+  coworking    Coworking @relation(fields: [coworkingId], references: [id])
+
+  @@map("reservations")
 }

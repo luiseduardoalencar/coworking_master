@@ -2,10 +2,14 @@ import { prisma } from '@/lib/prisma'
 import type { NextApiRequest, NextApiResponse } from 'next'
  
 interface ResponseData {
-  id: string
-  seatNumber: string 
-  coworkingId: string 
-  busy?: boolean | null
+  booking_date: Date
+  seat: {
+    seatNumber: string
+  }
+  user: {
+    name: string
+  }
+
 }
  
 export default async function handler(
@@ -22,15 +26,22 @@ export default async function handler(
     return res.status(400).end()
   }
 
-  const result = await prisma.seat.findMany({
+  const result = await prisma.reserve.findMany({
     where: {
       coworkingId
     },
     select: {
-      id: true,
-     seatNumber: true,
-      busy: true,
-      coworkingId: true
+     booking_date: true,
+     seat: {
+      select: {
+        seatNumber: true
+      }
+     },
+     user: {
+      select: {
+        name: true
+      }
+     }
     }
   })
 
