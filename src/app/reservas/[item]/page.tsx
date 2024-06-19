@@ -1,6 +1,6 @@
 "use client";
 
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, isBefore } from 'date-fns';
 import { fetchWrapper } from "@/lib/fetch";
 import { useEffect, useState } from "react";
 
@@ -30,7 +30,9 @@ export default function ReservaPage({params}: ParamsProps) {
           },
         }
       );
-      setReservations(response);
+      const now = new Date();
+      const upcomingReservations = response.filter(reservation => !isBefore(parseISO(reservation.booking_date), now));
+      setReservations(upcomingReservations);
     } catch (error) {
       console.error("Erro ao buscar reservas:", error);
     }
@@ -39,6 +41,8 @@ export default function ReservaPage({params}: ParamsProps) {
 useEffect(() => {
   getReserves();
 }, []);
+console.log(reservations);
+
   return (
     <div className="container mx-auto px-4">
       <h1 className='text-3xl font-bold text-center my-10'>Reservas</h1>

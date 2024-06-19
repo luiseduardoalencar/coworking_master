@@ -1,31 +1,35 @@
 /* datetime-custom.css */
 .rd-container {
-  background-color: #f0f0f0;
-  color: #333;
+  background-color: #0f172a;
+  color: #fff;
+  border-radius: 5px;
 }
 
 .rd-container input {
-  background-color: #fff;
-  color: #333;
+  background-color: #0f172a;
+  color: #fff;
+  
+ text-align: center;
 }
 
 .rd-container .rdtPicker {
-  background-color: #fff;
-  color: #333;
+  background-color: #0f172a;
+  color: #fff;
+  align-items: center;
 }
 
 .rd-container .rdtPicker .rdtTimeToggle {
-  color: #333;
+  color: #fff;
 }
 
 .rd-container .rdtPicker .dow,
 .rd-container .rdtPicker .rdtDay,
 .rd-container .rdtPicker .rdtMonth,
 .rd-container .rdtPicker .rdtYear {
-  color: #333;
+  color: #fff;
 }
 
 .rd-container .rdtPicker .rdtActive {
-  background-color: #007bff;
+  background-color: #0f172a;
   color: #fff;
 }

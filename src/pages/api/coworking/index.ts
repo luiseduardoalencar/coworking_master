@@ -13,14 +13,12 @@ export default async function handler(
     return res.status(405).end()
   }
 
-  const { name, type, imageUrl, seat } = req.body
-  console.log(seat);
+  const { name, type, seat } = req.body
   
   const result = await prisma.coworking.create({
     data: {
       name,
-      type,
-      imageUrl     
+      type,   
     },
      select: {
       id: true,

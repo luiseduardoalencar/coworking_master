@@ -6,6 +6,7 @@ interface ResponseData {
   seatNumber: string 
   coworkingId: string 
   busy?: boolean | null
+ 
 }
  
 export default async function handler(
@@ -22,18 +23,26 @@ export default async function handler(
     return res.status(400).end()
   }
 
-  const result = await prisma.seat.findMany({
-    where: {
-      coworkingId
-    },
-    select: {
-      id: true,
-     seatNumber: true,
-      busy: true,
-      coworkingId: true
-    }
-  })
+  try {
+    
+    const result = await prisma.seat.findMany({
+      where: {
+        coworkingId
+      },
+      select: {
+        id: true,
+       seatNumber: true,
+        busy: true,
+        coworkingId: true,
+        
+      }
+    })
 
+    
+    return res.status(201).json(result)
+    
+  }catch (error) {
+    return res.status(500).end()
+  }
 
-  return res.status(201).json(result)
 }

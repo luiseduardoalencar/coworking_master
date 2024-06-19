@@ -26,17 +26,27 @@ model User {
 }
 
 model Coworking {
-  id         String    @id @default(uuid())
-  name       String
-  type       String
-  imageUrl   String?
-  accents    String?
-  created_at DateTime  @default(now())
-  updated_at DateTime?
-  Seat       Seat[]
-  Reserve    Reserve[]
+  id             String           @id @default(uuid())
+  name           String
+  type           String
+  accents        String?
+  created_at     DateTime         @default(now())
+  updated_at     DateTime?
+  Seat           Seat[]
+  Reserve        Reserve[]
+  ImageCoworking ImageCoworking[]
 
   @@map("coworkings")
+}
+
+model ImageCoworking {
+  id        String    @id @default(uuid())
+  imagePath String?
+  coworking Coworking @relation(fields: [coworkingId], references: [id])
+
+  coworkingId String
+
+  @@map("image_coworkings")
 }
 
 model Seat {

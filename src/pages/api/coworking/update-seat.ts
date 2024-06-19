@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import type { NextApiRequest, NextApiResponse } from 'next'
- 
+import { addHours, subHours, parseISO } from 'date-fns';
+
 interface ResponseData {
   message: string
 }
@@ -14,33 +15,50 @@ export default async function handler(
   }
   const  {seatOwnerId, coworkingId, bookingDate, busy, id}  = req.body
 // console.log(seatOwnerId, bookingDate, busy, id, 'PUT SEAT');
-const existingReservation = await prisma.reserve.findFirst({
-  where: {
-    seatId: String(id),
-    booking_date: String(bookingDate),
+try {
+  const parsedBookingDate = parseISO(bookingDate);
+  const oneHourBefore = subHours(parsedBookingDate, 1);
+  const oneHourAfter = addHours(parsedBookingDate, 1);
+
+  // Verificar se já existe uma reserva para o mesmo assento no intervalo de 1 hora
+  const conflictingReservation = await prisma.reserve.findFirst({
+    where: {
+      seatId: String(id),
+      booking_date: {
+        gte: oneHourBefore.toISOString(),
+        lte: oneHourAfter.toISOString(),
+      }
+    }
+  });
+
+  if (conflictingReservation) {
+    return res.status(400).json({ status: 400, message: 'Não é possível reservar o assento neste horário devido a uma reserva existente no intervalo de 1 hora.' });
   }
-});
 
-if (existingReservation) {
-  return res.status(400).json({ message: 'A reserva já existe para esta data e espaço' });
-}
+  // Atualizar o estado do assento
   await prisma.seat.update({
-   where: {
-     id
-   }, data: {
-    busy
-   }
-  })
+    where: {
+      id
+    }, 
+    data: {
+      busy
+    }
+  });
 
+  // Criar a nova reserva
   await prisma.reserve.create({
-    data:{
+    data: {
       seatId: String(id),
       userId: String(seatOwnerId),
       booking_date: String(bookingDate),
       coworkingId
     }
-  })
+  });
 
+  return res.status(201).send({message: 'ok'});
 
-  return res.status(201).json({message: 'Seat updated successfully'})
+} catch (error) {
+  console.error('Error updating seat and reserving:', error);
+  return res.status(500).json({ message: 'Internal server error' });
+}
 }

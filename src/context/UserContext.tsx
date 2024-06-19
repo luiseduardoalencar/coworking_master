@@ -7,7 +7,6 @@ interface ResponseData {
   id: string;
   name: string;
   email: string;
-  imageUrl?: string;
   startupName?: string;
   phone?: string ;
 }
