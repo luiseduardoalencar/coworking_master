@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,11 +37,8 @@ interface EspacoCardProps {
 const addCoworkingSpaceSchema = z.object({
   seatOwnerId: z.string().min(1, { message: "Nome obrigatório" }),
   busy: z.boolean().optional(),
-  bookingDate: z.string().refine((date) => {
-    const today = new Date();
-    const selectedDate = parseISO(date);
-    return !isBefore(selectedDate, today);
-  }, { message: "Data não pode ser no passado" }),
+  startTime: z.string(),
+  endTime: z.string(),
 });
 
 type CoworkingSpaceSchema = z.infer<typeof addCoworkingSpaceSchema>;
@@ -61,7 +59,7 @@ export function ReserveModalSeat({ onClose, seatId, coworkingId }: EspacoCardPro
   });
 
   const handleReserveModalSeat = async (data: CoworkingSpaceSchema) => {
-    const bookingDate = new Date(data.bookingDate); 
+    // const bookingDate = new Date(data.bookingDate); 
     const init: RequestInit = {
       method: "PUT",
       headers: {
@@ -71,16 +69,22 @@ export function ReserveModalSeat({ onClose, seatId, coworkingId }: EspacoCardPro
         seatOwnerId: data.seatOwnerId,
         busy: data.busy,
         id: seatId,
-        bookingDate,
+        startTime: data.startTime,
+        endTime: data.endTime,
         coworkingId,
       }),
     };
     try {
-      const response = await fetchWrapper("/api/coworking/update-seat", init);
-      console.log(response);
+      await fetchWrapper("/api/coworking/update-seat", init);
+      console.log(data);
+      
       onClose();
     } catch (error) {
-      setErrorMessage(error.message);
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("Ocorreu um erro ao reservar o espaço.");
+      }
     }
   };
 
@@ -136,12 +140,12 @@ export function ReserveModalSeat({ onClose, seatId, coworkingId }: EspacoCardPro
               )}
             />
             <Controller
-              name="bookingDate"
+              name="startTime"
               control={control}
               render={({ field }) => (
                 <div className="flex flex-col space-y-1.5">
                   <Label className="text-start mb-4" htmlFor="date">
-                    Data da Reserva
+                  Horário de Início
                   </Label>
                   <Datetime
                     value={field.value ? new Date(field.value) : today}
@@ -152,9 +156,32 @@ export function ReserveModalSeat({ onClose, seatId, coworkingId }: EspacoCardPro
                     inputProps={{ placeholder: 'Selecione a data e hora' }}
                     className="rd-container"
                   />
-                  {errors.bookingDate && (
+                  {/* {errors.bookingDate && (
                     <span>{errors.bookingDate.message}</span>
-                  )}
+                  )} */}
+                </div>
+              )}
+            />
+            <Controller
+              name="endTime"
+              control={control}
+              render={({ field }) => (
+                <div className="flex flex-col space-y-1.5">
+                  <Label className="text-start mb-4" htmlFor="date">
+                  Horário de Fim
+                  </Label>
+                  <Datetime
+                    value={field.value ? new Date(field.value) : today}
+                    onChange={(date) => field.onChange(date.toISOString())}
+                    dateFormat="DD/MM/YYYY"
+                    timeFormat="HH:mm"
+                    isValidDate={(current) => current.isAfter(today)}
+                    inputProps={{ placeholder: 'Selecione a data e hora' }}
+                    className="rd-container"
+                  />
+                  {/* {errors.bookingDate && (
+                    <span>{errors.bookingDate.message}</span>
+                  )} */}
                 </div>
               )}
             />

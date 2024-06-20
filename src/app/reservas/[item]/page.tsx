@@ -10,9 +10,11 @@ interface ParamsProps {
   };
 }
 interface ReservationsData {
-  booking_date: string;
+  startTime: string;
+  andTime: string;
   seat: {
     seatNumber: string;
+    id: string;
   };
   user: {
     name: string;
@@ -31,7 +33,7 @@ export default function ReservaPage({params}: ParamsProps) {
         }
       );
       const now = new Date();
-      const upcomingReservations = response.filter(reservation => !isBefore(parseISO(reservation.booking_date), now));
+      const upcomingReservations = response.filter(reservation => !isBefore(parseISO(reservation.andTime), now));
       setReservations(upcomingReservations);
     } catch (error) {
       console.error("Erro ao buscar reservas:", error);
@@ -48,10 +50,13 @@ console.log(reservations);
       <h1 className='text-3xl font-bold text-center my-10'>Reservas</h1>
       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
         {reservations.map((reservation) => (
-          <div key={reservation.booking_date} className='flex flex-col border p-4 rounded shadow-md'>
+          <div key={reservation.seat.id} className='flex flex-col border p-4 rounded '>
             <p className='font-bold'>{reservation.user.name}</p>
             <p className='text-emerald-500'>Assento: {reservation.seat.seatNumber}</p>
-            <p>{format(parseISO(reservation.booking_date), "dd/MM - HH:mm'h'")}</p>
+              <span>{ format(parseISO(reservation.startTime), "dd/MM - HH:mm'h'")}</span>
+              <span>{format(parseISO(reservation.andTime), "dd/MM - HH:mm'h'")}</span>
+            
+            
           </div>
         ))}
       </div>
