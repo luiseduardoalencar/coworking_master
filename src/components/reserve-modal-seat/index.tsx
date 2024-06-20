@@ -27,6 +27,8 @@ import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
 import "@/components/reserve-modal-seat/datatime-custom.css"; 
 import { isBefore, parseISO } from "date-fns";
+import { api } from "@/http/api-client";
+import { HTTPError } from "ky";
 
 interface EspacoCardProps {
   onClose: () => void;
@@ -75,16 +77,16 @@ export function ReserveModalSeat({ onClose, seatId, coworkingId }: EspacoCardPro
       }),
     };
     try {
-      await fetchWrapper("/api/coworking/update-seat", init);
-      console.log(data);
-      
+      const response = await api.put('/api/coworking/update-seat', init);
+      // await fetchWrapper("/api/coworking/update-seat", init);
       onClose();
     } catch (error) {
-      if (error instanceof Error) {
-        setErrorMessage(error.message);
-      } else {
-        setErrorMessage("Ocorreu um erro ao reservar o espaço.");
-      }
+      if (error instanceof HTTPError) {
+        const { message } = await error.response.json();
+        setErrorMessage(message);
+      } 
+      console.error("Error:", error);
+      
     }
   };
 
