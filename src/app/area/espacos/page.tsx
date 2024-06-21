@@ -9,7 +9,7 @@ import { useEspaco } from "@/context/EspacoContext";
 
 export default function EspacosPage() {
   const [showEspacoCard, setShowEspacoCard] = useState(false);
-  const { espacos } = useEspaco();
+  const { espacos, deleteEspaco } = useEspaco();
 
   const handleAddClick = () => {
     setShowEspacoCard(true);
@@ -19,7 +19,14 @@ export default function EspacosPage() {
     setShowEspacoCard(false);
   };
 
-  
+  const handleDeleteClick = async (id: string) => {
+    try {
+      await deleteEspaco(id);
+    } catch (error) {
+      alert("Algo deu errado!");
+    }
+  };
+
   return (
     <div className="relative p-4">
       <h1 className="text-3xl font-semibold">Espaços</h1>
@@ -39,7 +46,8 @@ export default function EspacosPage() {
               <Link href={`/area/espacos/${item.id}`}>
                 <Button variant="outline">Editar</Button>
               </Link>
-              <Link href={`/area/espacos/${item.id}`}>
+              <Button variant="link" onClick={() => handleDeleteClick(item.id)}>Excluir</Button>
+              <Link href={`/area/espacos/${item.id}/reservar`}>
                 <Button variant="link">Reservar</Button>
               </Link>
             </div>
@@ -51,7 +59,7 @@ export default function EspacosPage() {
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
           <div className="relative z-10 flex flex-col items-center justify-center">
             <Button
-              className="h-7 w-7 p-0 absolute top-2 right-2 text-white p-2 rounded-full z-20"
+              className="h-7 w-7 p-0 absolute top-2 right-2 text-white rounded-full z-20"
               variant="ghost"
               onClick={handleClose}
             >

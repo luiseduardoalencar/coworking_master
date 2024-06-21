@@ -43,7 +43,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const getReserves = async () => {
     try {
-      const response = await fetchWrapper<ReservationsData[]>("/api/reservetions/get-reservetions", {
+      const response = await fetchWrapper<ReservationsData[]>("/api/reservations/get-reservations", {
         headers: {
           'coworkingId': '1'
         }
