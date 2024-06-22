@@ -29,6 +29,7 @@ import "@/components/reserve-modal-seat/datatime-custom.css";
 import { isBefore, parseISO } from "date-fns";
 import { api } from "@/http/api-client";
 import { HTTPError } from "ky";
+import { getCookie } from "cookies-next";
 
 interface EspacoCardProps {
   onClose: () => void;
@@ -66,7 +67,9 @@ export function ReserveModalSeat({ onClose, seatId, coworkingId }: EspacoCardPro
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        'Authorization': `Bearer ${getCookie('token')}`,
       },
+      
       body: JSON.stringify({
         seatOwnerId: data.seatOwnerId,
         busy: data.busy,
@@ -77,8 +80,8 @@ export function ReserveModalSeat({ onClose, seatId, coworkingId }: EspacoCardPro
       }),
     };
     try {
-      const response = await api.put('/api/coworking/update-seat', init);
-      // await fetchWrapper("/api/coworking/update-seat", init);
+      await api.put('/api/coworking/update-seat', init);
+
       onClose();
     } catch (error) {
       if (error instanceof HTTPError) {
@@ -151,7 +154,7 @@ export function ReserveModalSeat({ onClose, seatId, coworkingId }: EspacoCardPro
                   </Label>
                   <Datetime
                     value={field.value ? new Date(field.value) : today}
-                    onChange={(date) => field.onChange(date.toISOString())}
+                    onChange={(date) => field.onChange(date.toString())}
                     dateFormat="DD/MM/YYYY"
                     timeFormat="HH:mm"
                     isValidDate={(current) => current.isAfter(today)}
@@ -174,7 +177,7 @@ export function ReserveModalSeat({ onClose, seatId, coworkingId }: EspacoCardPro
                   </Label>
                   <Datetime
                     value={field.value ? new Date(field.value) : today}
-                    onChange={(date) => field.onChange(date.toISOString())}
+                    onChange={(date) => field.onChange(date.toString())}
                     dateFormat="DD/MM/YYYY"
                     timeFormat="HH:mm"
                     isValidDate={(current) => current.isAfter(today)}

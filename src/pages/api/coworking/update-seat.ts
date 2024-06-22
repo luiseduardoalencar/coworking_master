@@ -13,7 +13,9 @@ export default async function handler(
   if (req.method !== "PUT") {
     return res.status(405).end();
   }
-  ;
+  const token = req.headers.authorization;
+  console.log(token);
+  
   const { seatOwnerId, coworkingId, startTime, endTime, busy, id } = req.body;
   try {
     // Verificar se o assento já está reservado no período solicitado

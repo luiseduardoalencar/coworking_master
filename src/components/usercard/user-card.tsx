@@ -13,6 +13,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { fetchWrapper } from "@/lib/fetch";
+import { getCookie } from "cookies-next";
 
 interface UserCardProps {
   onClose: () => void;
@@ -46,6 +47,7 @@ export function UserCard({ onClose }: UserCardProps) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${getCookie("token")}`,
       },
       body: JSON.stringify(data),
     }

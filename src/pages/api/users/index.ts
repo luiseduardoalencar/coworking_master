@@ -13,6 +13,8 @@ export default async function handler(
     return res.status(405).end()
   }
 
+  const token = req.headers.authorization
+  console.log(token), "AUTHOR";
   
   const { name, email, imageUrl, startupName, phone } = req.body
 

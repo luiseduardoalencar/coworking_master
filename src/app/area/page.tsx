@@ -1,8 +1,9 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import  ProtectedRoute  from '@/components/ProtectedRoute';
 
-export default function Areas() {
+ export default function Areas() {
    
     const hubs = [
         { id: 'hub-investe-piaui', name: 'Hub Investe Piauí' },
@@ -30,3 +31,4 @@ export default function Areas() {
         </div>
     );
 }
+

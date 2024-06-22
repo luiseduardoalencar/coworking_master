@@ -19,6 +19,7 @@ export default function EspacosPage() {
     setShowEspacoCard(false);
   };
 
+  console.log(espacos);
   
   return (
     <div className="relative p-4">
