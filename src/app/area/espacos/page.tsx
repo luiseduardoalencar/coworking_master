@@ -47,7 +47,7 @@ export default function EspacosPage() {
                 <Button variant="outline">Editar</Button>
               </Link>
               <Button variant="link" onClick={() => handleDeleteClick(item.id)}>Excluir</Button>
-              <Link href={`/area/espacos/${item.id}/reservar`}>
+              <Link href={`/area/espacos/${item.id}`}>
                 <Button variant="link">Reservar</Button>
               </Link>
             </div>
