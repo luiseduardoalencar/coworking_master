@@ -25,7 +25,7 @@ export default function ReservaPage({params}: ParamsProps) {
   const getReserves = async () => {
     try {
       const response = await fetchWrapper<ReservationsData[]>(
-        "/api/reservetions/get-reservetions",
+        "/api/reservations/get-reservations",
         {
           headers: {
             coworkingId: params.item,
