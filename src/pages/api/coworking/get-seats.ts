@@ -34,10 +34,14 @@ export default async function handler(
        seatNumber: true,
         busy: true,
         coworkingId: true,
-        
       }
     })
 
+    result.sort((a, b) => {
+      const seatA = parseInt(a.seatNumber, 10);
+      const seatB = parseInt(b.seatNumber, 10);
+      return seatA - seatB;
+    });
     
     return res.status(201).json(result)
     

@@ -11,7 +11,8 @@ export default async function handler(
   }
 
   const authHeader = req.headers.authorization
-
+  console.log(authHeader, "AUTHOR");
+  
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ message: 'Token não fornecido ou inválido' })
   }

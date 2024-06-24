@@ -53,7 +53,7 @@ export default function UserPage() {
         {users.map((item) => (
           <li
             key={item.id}
-            className="p-4 border border-white rounded shadow-sm block flex justify-between items-center cursor-pointer"
+            className="p-4 border border-gray-400 rounded shadow-sm flex justify-between items-center cursor-pointer"
             
           >
             <span>{item.name}</span>
@@ -67,14 +67,14 @@ export default function UserPage() {
       </ul>
 
       {showUserCard && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="relative z-10 flex flex-col items-center justify-center">
             <Button
-              className="h-7 w-7 p-0 absolute top-2 right-2 text-white p-2 rounded-full z-20"
+              className="mt-3 p-0 rounded-s-full absolute top-2 right-4 text-white z-20 hover:bg-transparent"
               variant="ghost"
               onClick={handleClose}
             >
-              <X size={15} />
+              <X size={25} />
             </Button>
             <div className="w-full h-full flex items-center justify-center">
               <UserCard onClose={handleClose} />

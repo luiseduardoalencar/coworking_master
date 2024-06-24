@@ -20,8 +20,10 @@ interface ReservationsData {
     name: string;
   };
 }
-export default function ReservaPage({params}: ParamsProps) {
+
+export default function ReservaPage({ params }: ParamsProps) {
   const [reservations, setReservations] = useState<ReservationsData[]>([]);
+  
   const getReserves = async () => {
     try {
       const response = await fetchWrapper<ReservationsData[]>(
@@ -40,26 +42,29 @@ export default function ReservaPage({params}: ParamsProps) {
     }
   };
 
-useEffect(() => {
-  getReserves();
-}, []);
-console.log(reservations);
+  useEffect(() => {
+    getReserves();
+  }, []);
 
   return (
     <div className="container mx-auto px-4">
       <h1 className='text-3xl font-bold text-center my-10'>Reservas</h1>
-      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
-        {reservations.map((reservation) => (
-          <div key={reservation.seat.id} className='flex flex-col border p-4 rounded '>
-            <p className='font-bold'>{reservation.user.name}</p>
-            <p className='text-emerald-500'>Assento: {reservation.seat.seatNumber}</p>
-              <span>{ format(parseISO(reservation.startTime), "dd/MM - HH:mm'h'")}</span>
+      {reservations.length === 0 ? (
+        <div className='flex justify-center items-center h-64'>
+          <p className='text-lg text-gray-500'>Nenhuma reserva encontrada</p>
+        </div>
+      ) : (
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
+          {reservations.map((reservation) => (
+            <div key={reservation.seat.id} className='flex flex-col border p-4 rounded'>
+              <p className='font-bold'>{reservation.user.name}</p>
+              <p className='text-emerald-500'>Assento: {reservation.seat.seatNumber}</p>
+              <span>{format(parseISO(reservation.startTime), "dd/MM - HH:mm'h'")}</span>
               <span>{format(parseISO(reservation.andTime), "dd/MM - HH:mm'h'")}</span>
-            
-            
-          </div>
-        ))}
-      </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

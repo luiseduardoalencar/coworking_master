@@ -5,7 +5,10 @@ interface ResponseData {
   id: string
   name: string
   type: string
-  imageUrl?: string | null
+  imageUrl?: string | null,
+  Seat: {
+    busy?: boolean | null
+  }[]
 }
  
 export default async function handler(
@@ -21,6 +24,11 @@ export default async function handler(
       id: true,
       name: true,
       type: true,
+      Seat: {
+        select: {
+          busy: true,
+        }
+      }
     }
   })
 

@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,16 +19,14 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { z } from "zod";
-import { fetchWrapper } from "@/lib/fetch";
 import { Switch } from "../ui/switch";
 import { useUser } from "@/context/UserContext";
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
-import "@/components/reserve-modal-seat/datatime-custom.css"; 
-import { isBefore, parseISO } from "date-fns";
+import "@/components/reserve-modal-seat/datatime-custom.css";
 import { api } from "@/http/api-client";
 import { HTTPError } from "ky";
-import { getCookie } from "cookies-next";
+import { getAuthToken } from "@/auth/cookie-auth";
 
 interface EspacoCardProps {
   onClose: () => void;
@@ -46,7 +43,11 @@ const addCoworkingSpaceSchema = z.object({
 
 type CoworkingSpaceSchema = z.infer<typeof addCoworkingSpaceSchema>;
 
-export function ReserveModalSeat({ onClose, seatId, coworkingId }: EspacoCardProps) {
+export function ReserveModalSeat({
+  onClose,
+  seatId,
+  coworkingId,
+}: EspacoCardProps) {
   const { users } = useUser();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -62,43 +63,42 @@ export function ReserveModalSeat({ onClose, seatId, coworkingId }: EspacoCardPro
   });
 
   const handleReserveModalSeat = async (data: CoworkingSpaceSchema) => {
-    // const bookingDate = new Date(data.bookingDate); 
-    const init: RequestInit = {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        'Authorization': `Bearer ${getCookie('token')}`,
-      },
-      
-      body: JSON.stringify({
-        seatOwnerId: data.seatOwnerId,
-        busy: data.busy,
-        id: seatId,
-        startTime: data.startTime,
-        endTime: data.endTime,
-        coworkingId,
-      }),
-    };
+    const token = await getAuthToken();
+   
+    
     try {
-      await api.put('/api/coworking/update-seat', init);
+      await api.put("/api/coworking/update-seat", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        json: {
+          seatOwnerId: data.seatOwnerId,
+          busy: data.busy,
+          id: seatId,
+          startTime: data.startTime,
+          endTime: data.endTime,
+          coworkingId,
+        },
+      });
 
       onClose();
     } catch (error) {
       if (error instanceof HTTPError) {
         const { message } = await error.response.json();
         setErrorMessage(message);
-      } 
+      }
       console.error("Error:", error);
-      
     }
   };
 
   const today = new Date();
 
   return (
-    <Card className="w-[350px]">
+    <Card className="w-[400px] rounded border-none">
       <CardHeader>
-        <CardTitle>Reservar Espaço</CardTitle>
+        <CardTitle className="text-gray-300">Reservar Espaço</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(handleReserveModalSeat)}>
@@ -150,7 +150,7 @@ export function ReserveModalSeat({ onClose, seatId, coworkingId }: EspacoCardPro
               render={({ field }) => (
                 <div className="flex flex-col space-y-1.5">
                   <Label className="text-start mb-4" htmlFor="date">
-                  Horário de Início
+                    Horário de Início
                   </Label>
                   <Datetime
                     value={field.value ? new Date(field.value) : today}
@@ -158,7 +158,7 @@ export function ReserveModalSeat({ onClose, seatId, coworkingId }: EspacoCardPro
                     dateFormat="DD/MM/YYYY"
                     timeFormat="HH:mm"
                     isValidDate={(current) => current.isAfter(today)}
-                    inputProps={{ placeholder: 'Selecione a data e hora' }}
+                    inputProps={{ placeholder: "Selecione a data e hora" }}
                     className="rd-container"
                   />
                   {/* {errors.bookingDate && (
@@ -173,7 +173,7 @@ export function ReserveModalSeat({ onClose, seatId, coworkingId }: EspacoCardPro
               render={({ field }) => (
                 <div className="flex flex-col space-y-1.5">
                   <Label className="text-start mb-4" htmlFor="date">
-                  Horário de Fim
+                    Horário de Fim
                   </Label>
                   <Datetime
                     value={field.value ? new Date(field.value) : today}
@@ -181,7 +181,7 @@ export function ReserveModalSeat({ onClose, seatId, coworkingId }: EspacoCardPro
                     dateFormat="DD/MM/YYYY"
                     timeFormat="HH:mm"
                     isValidDate={(current) => current.isAfter(today)}
-                    inputProps={{ placeholder: 'Selecione a data e hora' }}
+                    inputProps={{ placeholder: "Selecione a data e hora" }}
                     className="rd-container"
                   />
                   {/* {errors.bookingDate && (

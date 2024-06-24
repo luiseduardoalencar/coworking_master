@@ -1,6 +1,5 @@
 import * as jose from 'jose';
 import { getCookie, setCookie, deleteCookie } from 'cookies-next';
-import { NextRequest } from 'next/server';
 
 async function openSessionToken(token: string) {
   const secret = new TextEncoder().encode('default_secret');

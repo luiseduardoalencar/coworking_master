@@ -3,9 +3,8 @@
 import { ReserveModalSeat } from "@/components/reserve-modal-seat";
 import { Button } from "@/components/ui/button";
 import { fetchWrapper } from "@/lib/fetch";
-import { X } from "lucide-react";
+import { LoaderCircle, X } from "lucide-react";
 import Image from "next/image";
-
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -28,6 +27,7 @@ export default function ReservasDisponiveis({params}: Props) {
   const [showModalSeat, setShowModalSeat] = useState(false);
   const [selectedSeatId, setSelectedSeatId] = useState<string>('');
   const [imagePath, setImagePath] = useState<ResponseImagePath>();
+  const [loading, setLoading] = useState(true); 
 
   const handleAddClick = (id: string) => {
     setSelectedSeatId(id);
@@ -54,6 +54,8 @@ export default function ReservasDisponiveis({params}: Props) {
       setImagePath(imagePath);
     } catch (error) {
       console.error("Failed to fetch espacos:", error);
+    } finally {
+      setLoading(false); 
     }
   };
       
@@ -61,42 +63,46 @@ export default function ReservasDisponiveis({params}: Props) {
     getSeats();
   }, []);
   
-  console.log(imagePath, "IMAGEM");
-
   return (
     <div className="w-full text-center p-5">
-      <h1>Espaços disponíveis</h1>
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
-          <div className="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-5 gap-2 justify-items-center">
-            {seats.map((seat) => (
-              <Button onClick={() => handleAddClick(seat.id)} key={seat.id} className="bg-transparent hover:bg-transparent"> 
-                <div className={`w-7 h-7 flex items-center justify-center rounded-full ${seat.busy ? 'bg-blue-500' : 'bg-gray-100'}`}>{seat.seatNumber}</div>
-              </Button>
-            ))}
-          </div>
+      <h1 className="text-2xl font-semibold">Espaços disponíveis</h1>
+      {loading ? (
+        <div className="flex justify-center items-center h-screen">
+          <LoaderCircle size={24} className="animate-spin"/>
         </div>
-        {imagePath && (
-          <div className="flex justify-center items-center">
-            <Image
-              alt="Coworking space"
-              src={imagePath.imagePath.startsWith("/images") ? imagePath.imagePath : `/images/${imagePath.imagePath}`}
-              width={600}
-              height={600}
-              className="object-contain"
-            />
+      ) : (
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <div className="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-5 gap-2 justify-items-center">
+              {seats.map((seat) => (
+                <Button onClick={() => handleAddClick(seat.id)} key={seat.id} className="bg-transparent hover:bg-transparent"> 
+                  <div className={`w-7 h-7 flex items-center justify-center rounded-full ${seat.busy ? 'bg-blue-500' : 'bg-gray-100'}`}>{seat.seatNumber}</div>
+                </Button>
+              ))}
+            </div>
           </div>
-        )}
-      </div>
+          {imagePath && (
+            <div className="flex justify-center items-center">
+              <Image
+                alt="Coworking space"
+                src={imagePath.imagePath.startsWith("/images") ? imagePath.imagePath : `/images/${imagePath.imagePath}`}
+                width={600}
+                height={600}
+                className="object-contain"
+              />
+            </div>
+          )}
+        </div>
+      )}
       {showModalSeat && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
           <div className="relative z-10 flex flex-col items-center justify-center">
             <Button
-              className="h-7 w-7 p-0 absolute top-2 right-2 text-white p-2 rounded-full z-20"
+              className=" absolute top-4 right-2 text-white p-2 rounded-full z-20"
               variant="ghost"
               onClick={handleClose}
             >
-              <X size={15} />
+              <X size={25} />
             </Button>
             <div className="w-full h-full flex items-center justify-center">
               <ReserveModalSeat onClose={handleClose} seatId={selectedSeatId} coworkingId={params.seat} />

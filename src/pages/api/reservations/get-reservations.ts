@@ -47,7 +47,6 @@ export default async function handler(
      }
     }
   })
-console.log(result);
 
   return res.status(201).json(result)
 }

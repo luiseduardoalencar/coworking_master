@@ -13,9 +13,12 @@ export default async function handler(
     return res.status(405).end();
   }
   const token = req.headers.authorization;
-  console.log(token);
   
   const { seatOwnerId, coworkingId, startTime, endTime, busy, id } = req.body;
+  
+  const start = new Date(startTime).toISOString();
+  const end = new Date(endTime).toISOString();
+  
   try {
     // Verificar se o assento já está reservado no período solicitado
     const existingReservations = await prisma.reserve.findMany({
@@ -24,10 +27,10 @@ export default async function handler(
         OR: [
           {
             startTime: {
-              lte: endTime,
+              lte: end,
             },
             andTime: {
-              gte: startTime,
+              gte: start,
             },
           },
         ],
@@ -52,8 +55,8 @@ export default async function handler(
       data: {
         seatId: String(id),
         userId: String(seatOwnerId),
-        startTime,
-        andTime: endTime,
+        startTime: start,
+        andTime: end,
         coworkingId,
       },
     });

@@ -1,38 +1,58 @@
+import AuthService from '@/auth/auth.service'
 import { prisma } from '@/lib/prisma'
 import type { NextApiRequest, NextApiResponse } from 'next'
- 
-type ResponseData = {
-  id: string
-}
- 
+
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ResponseData>
+  res: NextApiResponse
 ) {
   if (req.method !== 'POST') {
-    return res.status(405).end()
+    return res.status(405).end();
   }
 
-  const { name, type, seat } = req.body
+  const authorizationHeader = req.headers.authorization;
+  if (!authorizationHeader) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  // Extrair o token do formato "Bearer {token}"
+  const token = authorizationHeader.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
   
-  const result = await prisma.coworking.create({
-    data: {
-      name,
-      type,   
-    },
-     select: {
-      id: true,
+  
+  try {
+    const tokenData = await AuthService.openSessionToken(token);
+    if (!tokenData) {
+      return res.status(401).json({ message: 'Unauthorized' });
     }
-  })
-
-  for (let i = 1; i <= seat; i++) {
-    await prisma.seat.create({
+    const { name, type, seat } = req.body;
+    if (!name || !type || !seat) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+    const result = await prisma.coworking.create({
       data: {
-        coworkingId: result.id,
-        seatNumber: String(i),
-      }
-    })
-  }
+        name,
+        type,
+      },
+      select: {
+        id: true,
+      },
+    });
 
-  return res.status(201).json(result)
+    const seatsData = Array.from({ length: seat }, (_, i) => ({
+      coworkingId: result.id,
+      seatNumber: String(i + 1),
+    }));
+
+    await prisma.seat.createMany({
+      data: seatsData,
+    });
+
+    return res.status(201).json(result);
+  } catch (error) {
+    console.error("Error creating coworking and seats:", error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
 }

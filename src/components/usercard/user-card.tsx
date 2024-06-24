@@ -60,9 +60,9 @@ export function UserCard({ onClose }: UserCardProps) {
   };
 
   return (
-    <Card className="w-[350px]">
+    <Card className="w-[400px] rounded border-none">
       <CardHeader>
-        <CardTitle>Registrar Nova Startup</CardTitle>
+        <CardTitle className="text-center text-gray-300 text-xl">Registrar Nova Startup</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(handleRegisterUser)}>
@@ -117,7 +117,7 @@ export function UserCard({ onClose }: UserCardProps) {
               />
               {errors.imageUrl && <span>{errors.imageUrl.message}</span>}
             </div>
-            <CardFooter className="flex items-center justify-items-center mt-4">
+            <CardFooter className="max-w-full">
               <Button type="submit" className="w-full">Registrar</Button>
             </CardFooter>
           </div>

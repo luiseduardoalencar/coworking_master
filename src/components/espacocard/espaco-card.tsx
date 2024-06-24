@@ -23,6 +23,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { fetchWrapper } from "@/lib/fetch";
 import Image from "next/image";
+import { getAuthToken } from "@/auth/cookie-auth";
 
 interface EspacoCardProps {
   onClose: () => void;
@@ -31,10 +32,12 @@ interface EspacoCardProps {
 const addCoworkingSpaceSchema = z.object({
   name: z.string().min(1, { message: "Nome obrigatório" }),
   type: z.string().min(1, { message: "Tipo obrigatório" }),
-  seat : z.string().min(1, { message: "Assento obrigatório" }),
+  seat: z.string().min(1, { message: "Assento obrigatório" }),
   image: z
     .instanceof(File)
-    .refine((file) => file.size <= 5 * 1024 * 1024, { message: "Imagem deve ter no máximo 5MB" }),
+    .refine((file) => file.size <= 5 * 1024 * 1024, {
+      message: "Imagem deve ter no máximo 5MB",
+    }),
 });
 
 type CoworkingSpaceSchema = z.infer<typeof addCoworkingSpaceSchema>;
@@ -54,34 +57,33 @@ export function EspacoCard({ onClose }: EspacoCardProps) {
   });
 
   const handleRegisterSpace = async (data: CoworkingSpaceSchema) => {
-  
     if (!selectedFile) return;
     const formData = new FormData();
     formData.append("myImage", selectedFile);
-
- const init: RequestInit = {
+    const token = await getAuthToken();
+    const init: RequestInit = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(data),
-    }
+    };
     try {
-      const {id}: any  = await fetchWrapper("/api/coworking", init);
-    
-      
+      const { id }: any = await fetchWrapper("/api/coworking", init);
+
       await fetchWrapper(`/api/coworking/save-image-coworking`, {
         method: "POST",
         headers: {
-          id 
+          id,
         },
-        body: formData
+        body: formData,
       });
     } catch (error) {
       console.error("Error:", error);
     }
     onClose();
-    };
+  };
   return (
     <Card className="w-[350px]">
       <CardHeader>
@@ -91,24 +93,32 @@ export function EspacoCard({ onClose }: EspacoCardProps) {
         <form onSubmit={handleSubmit(handleRegisterSpace)}>
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="image">Imagem</Label>
-              <Input
-          type="file"
-          hidden
-          onChange={({ target }) => {
-            if (target.files) {
-              const file = target.files[0];
-              setSelectedImage(URL.createObjectURL(file));
-              setSelectedFile(file);
-              setValue("image", file);
-            }
-          }}
-        />
-              
-              {errors.image && <span>{errors.image.message}</span>}
-              {selectedImage && <Image src={selectedImage} width={400} height={400} alt="Preview" className="mt-2 max-h-64" />}
-            </div>
+              <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="image">Imagem</Label>
+                <Input
+                  type="file"
+                  hidden
+                  onChange={({ target }) => {
+                    if (target.files) {
+                      const file = target.files[0];
+                      setSelectedImage(URL.createObjectURL(file));
+                      setSelectedFile(file);
+                      setValue("image", file);
+                    }
+                  }}
+                />
+
+                {errors.image && <span>{errors.image.message}</span>}
+                {selectedImage && (
+                  <Image
+                    src={selectedImage}
+                    width={400}
+                    height={400}
+                    alt="Preview"
+                    className="mt-2 max-h-64"
+                  />
+                )}
+              </div>
               <Label htmlFor="name">Nome</Label>
               <Input
                 {...register("name")}
@@ -116,7 +126,7 @@ export function EspacoCard({ onClose }: EspacoCardProps) {
                 placeholder="Nome do espaço"
                 type="text"
               />
-               {errors.name && <span>{errors.name.message}</span>}
+              {errors.name && <span>{errors.name.message}</span>}
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="espaco">Tipo de Espaço</Label>
@@ -144,7 +154,6 @@ export function EspacoCard({ onClose }: EspacoCardProps) {
                 )}
               />
               {errors.type && <span>{errors.type.message}</span>}
-              
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="seat">Assentos</Label>
@@ -153,13 +162,14 @@ export function EspacoCard({ onClose }: EspacoCardProps) {
                 id="seat"
                 placeholder="Numero de assentos"
                 type="number"
-               
               />
-               {errors.seat && <span>{errors.seat.message}</span>}
+              {errors.seat && <span>{errors.seat.message}</span>}
             </div>
-        <CardFooter className="flex items-center justify-items-center mt-4">
-            <Button type="submit"  className="w-full">Criar</Button>
-        </CardFooter>
+            <CardFooter className="flex items-center justify-items-center mt-4">
+              <Button type="submit" className="w-full">
+                Criar
+              </Button>
+            </CardFooter>
           </div>
         </form>
       </CardContent>

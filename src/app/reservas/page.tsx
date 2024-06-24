@@ -9,22 +9,14 @@ export default function ReservasDisponiveis() {
 
     return (
         <div style={{ textAlign: 'center', padding: '20px' }}>
-            <h1>Espaços disponíveis</h1>
-            <div style={{ marginTop: '20px' }}>
+            <h1  className='text-3xl font-bold'>Espaços disponíveis</h1>
+            <div style={{ marginTop: '20px' }} >
                 {espacos.length > 0 ? (
-                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {espacos.map((espaco, index) => (
                             <div 
                                 key={index} 
-                                style={{ 
-                                    border: '1px solid #ccc', 
-                                    borderRadius: '8px', 
-                                    padding: '20px', 
-                                    margin: '10px', 
-                                    width: '300px', 
-                                    textAlign: 'left',
-                                    boxShadow: '0 0 10px rgba(0,0,0,0.1)'
-                                }}
+                                className="flex flex-col border p-4 rounded "
                             >
                                 <h2 style={{ margin: '10px 0' }}>{espaco.name}</h2>
                                 <Button variant="default" >

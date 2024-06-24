@@ -81,7 +81,7 @@ export const EditUserModal = ({
     <>
       <Dialog.Root open={openModal}>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed w-screen h-screen inset-0 bg-gray-900/[.6]" />
+          <Dialog.Overlay className="fixed w-screen h-screen inset-0 bg-black/50" />
           <Dialog.Content className="w-[400px] rounded py-5 flex flex-col items-center bg-card fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30">
             <Dialog.Close
               onClick={() => setOpenModal(false)}

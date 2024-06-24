@@ -35,25 +35,31 @@ export default function EspacosPage() {
         remover espaços.
       </p>
 
-      <ul className="mt-4 space-y-2">
-        {espacos.map((item) => (
-          <li
-            key={item.id}
-            className="p-4 border border-white rounded shadow-sm flex justify-between items-center"
-          >
-            <span>{item.name}</span>
-            <div className="flex space-x-2">
-              <Link href={`/area/espacos/${item.id}`}>
-                <Button variant="outline">Editar</Button>
-              </Link>
-              <Button variant="link" onClick={() => handleDeleteClick(item.id)}>Excluir</Button>
-              <Link href={`/area/espacos/${item.id}`}>
-                <Button variant="link">Reservar</Button>
-              </Link>
-            </div>
-          </li>
-        ))}
-      </ul>
+      {espacos.length === 0 ? (
+        <div className='flex justify-center items-center h-64'>
+          <p className='text-lg text-gray-500'>Nenhum espaço encontrado</p>
+        </div>
+      ) : (
+        <ul className="mt-4 space-y-2">
+          {espacos.map((item) => (
+            <li
+              key={item.id}
+              className="p-4 border border-white rounded shadow-sm flex justify-between items-center"
+            >
+              <span>{item.name}</span>
+              <div className="flex space-x-2">
+                <Link href={`/area/espacos/${item.id}`}>
+                  <Button variant="outline">Editar</Button>
+                </Link>
+                <Button variant="link" onClick={() => handleDeleteClick(item.id)}>Excluir</Button>
+                <Link href={`/area/espacos/${item.id}`}>
+                  <Button variant="link">Reservar</Button>
+                </Link>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {showEspacoCard && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">

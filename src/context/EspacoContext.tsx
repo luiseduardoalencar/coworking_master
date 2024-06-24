@@ -1,12 +1,16 @@
 "use client";
 import React, { createContext, useState, ReactNode, useContext, useEffect } from 'react';
 import { fetchWrapper } from '@/lib/fetch';
+import { api } from '@/http/api-client';
 
 interface EspacoData {
   id: string;
   name: string;
   type: string;
   imageUrl?: string | null;
+  Seat: {
+    busy?: boolean | null
+  }[]
 }
 
 interface EspacoContextProps {
@@ -22,8 +26,8 @@ export const EspacoProvider = ({ children }: { children: ReactNode }) => {
 
   const getEspacos = async () => {
     try {
-      const response = await fetchWrapper<EspacoData[]>("/api/coworking/get-coworkings");
-      setEspacos(response);
+      const response = await api.get('/api/coworking/get-coworkings').json<EspacoData[]>();
+      setEspacos(response); 
     } catch (error) {
       console.error('Erro ao buscar espaços:', error);
     }
