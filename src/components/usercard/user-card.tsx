@@ -65,7 +65,7 @@ export function UserCard({ onClose }: UserCardProps) {
         <CardTitle className="text-center text-gray-300 text-xl">Registrar Nova Startup</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(handleRegisterUser)}>
+        <form onSubmit={handleSubmit(handleRegisterUser)} >
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">Nome</Label>

@@ -36,22 +36,11 @@ export default function FormSignIn() {
 })
   const handleSignIn = async (data: SchemaSignIn) => {
    
-    const {token}: {token: string} = await api.post('/api/admin/auth-admin', {
+    await api.post('/api/admin/auth-admin', {
       method: "POST",
       json: data,
      }).json();
     
-     
-    //  if  (token) {
-    //   if (token) {
-    //     Cookies.set('token', token, {
-    //       expires: 7, // 7 days
-    //       path: '/',
-    //     })
-    //   }
-    //  }
-   
-   console.log("REDIRECT: ");
    
    router.push('/')
   }
