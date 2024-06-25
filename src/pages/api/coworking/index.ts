@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const tokenData = await AuthService.openSessionToken(token);
-    if (!tokenData.role !== 'ADMIN') {
+    if (tokenData.role !== 'ADMIN') {
       return res.status(401).json({ message: 'Não autorizado' });
     }
 

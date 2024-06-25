@@ -50,20 +50,29 @@ export default function UserPage() {
       </p>
 
       <ul className="mt-4 space-y-2">
-        {users.map((item) => (
-          <li
-            key={item.id}
-            className="p-4 border border-gray-400 rounded shadow-sm flex justify-between items-center cursor-pointer"
-            
-          >
-            <span>{item.name}</span>
-            <div className="flex space-x-2">
-              <Button variant="outline" onClick={() => setOpenModal(true)}>Editar</Button>
-              <DeleteButton onClick={() => handleDeleteUser(item.id)} />
-            </div>
-            <EditUserModal user={item} openModal={openModal} setOpenModal={setOpenModal}  />
-          </li>
-        ))}
+       {users ?
+        users.map((item) => (
+          
+            <li
+              key={item.id}
+              className="p-4 border border-gray-400 rounded shadow-sm flex justify-between items-center cursor-pointer"
+              
+            >
+              <span>{item.name}</span>
+              <div className="flex space-x-2">
+                <Button variant="outline" onClick={() => setOpenModal(true)}>Editar</Button>
+                <DeleteButton onClick={() => handleDeleteUser(item.id)} />
+              </div>
+              <EditUserModal user={item} openModal={openModal} setOpenModal={setOpenModal}  />
+            </li>
+          
+        ))
+       : 
+       <div className="flex justify-center items-center">
+          <h2>Nenhum usuário encontrado</h2>
+
+       </div>
+      }
       </ul>
 
       {showUserCard && (

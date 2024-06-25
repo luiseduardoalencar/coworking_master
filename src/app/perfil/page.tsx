@@ -1,8 +1,11 @@
 "use client";
-import { getAuthToken } from "@/auth/cookie-auth";
+
+import { destroySession, getAuthToken } from "@/auth/cookie-auth";
+import { Button } from "@/components/ui/button";
 import { api } from "@/http/api-client";
 import { HTTPError } from "ky";
-import { Mail, User, UserRoundCog } from "lucide-react";
+import { LoaderCircle, LogOut, Mail, User, UserRoundCog } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface ProfileProps {
@@ -13,7 +16,9 @@ interface ProfileProps {
 }
 
 export default function PerfilPage() {
-  const [profile, setProfile] = useState<ProfileProps>({} as ProfileProps);
+  const [profile, setProfile] = useState<ProfileProps | null>(null);
+  const router = useRouter();
+
   const getPerfil = async () => {
     const token = await getAuthToken();
     try {
@@ -33,13 +38,23 @@ export default function PerfilPage() {
     }
   };
 
+  const logout = async () => {
+    destroySession();
+    router.push("/auth/sign-in");
+  };
+
   useEffect(() => {
     getPerfil();
   }, []);
+
   return (
     <div>
       <h1 className="text-3xl font-semibold">Perfil</h1>
-      {profile && (
+      {profile === null ? (
+        <div className="flex justify-center items-center h-screen">
+          <LoaderCircle size={24} className="animate-spin" />
+        </div>
+      ) : (
         <div className="flex flex-col gap-4 mt-10">
           <div className="flex gap-2 items-center justify-start">
             <User size={32} />
@@ -52,6 +67,15 @@ export default function PerfilPage() {
           <div className="flex gap-2 items-center">
             <UserRoundCog scale={34} />
             <p>{profile.role}</p>
+          </div>
+          <div className="flex items-center">
+            <LogOut />
+            <Button
+              className="bg-transparent hover:bg-transparent text-white"
+              onClick={() => logout()}
+            >
+              Sair
+            </Button>
           </div>
         </div>
       )}

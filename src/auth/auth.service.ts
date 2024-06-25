@@ -1,6 +1,7 @@
 import * as jose from 'jose';
 import { getCookie, setCookie, deleteCookie } from 'cookies-next';
 
+
 async function openSessionToken(token: string) {
   const secret = new TextEncoder().encode('default_secret');
   const { payload } = await jose.jwtVerify(token, secret);
@@ -45,16 +46,11 @@ async function isSessionValid(req: any) {
   return false;
 }
 
-function destroySession(req: any, res:any) {
-  deleteCookie('token', { req, res });
-  console.log('Session destroyed');
-}
 
 const AuthService = {
   openSessionToken,
   createSessionToken,
   isSessionValid,
-  destroySession,
 };
 
 export default AuthService;

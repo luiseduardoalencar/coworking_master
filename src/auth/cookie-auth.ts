@@ -10,3 +10,7 @@ export async function  isAuthenticated() {
 export async  function getAuthToken() {
   return cookies().get("token")?.value;
 }
+
+export async function destroySession() {
+  cookies().delete("token");
+}
