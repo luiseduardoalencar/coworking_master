@@ -3,29 +3,39 @@ import React, { useState } from "react";
 import { EspacoCard } from "@/components/espacocard/espaco-card";
 import { AddButton } from "@/components/addbutton/addbutton";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { LoaderCircle, X } from "lucide-react";
 import Link from "next/link";
 import { useEspaco } from "@/context/EspacoContext";
+import { toast } from "sonner";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { GetSpaces } from "@/http/get-spaces";
+import { DeleteSpace } from "@/http/delete-space";
 
 export default function EspacosPage() {
-  const [showEspacoCard, setShowEspacoCard] = useState(false);
-  const { espacos, deleteEspaco } = useEspaco();
+  const { deleteEspaco } = useEspaco();
+  const [openModal, setOpenModal] = useState(false);
+  const queryClient = useQueryClient();
 
-  const handleAddClick = () => {
-    setShowEspacoCard(true);
-  };
-
-  const handleClose = () => {
-    setShowEspacoCard(false);
-  };
+  const { mutateAsync: deleteSapce } = useMutation({
+    mutationFn: DeleteSpace,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["spaces"] });
+      toast.success("Espaço removido com sucesso");
+    },
+  });
 
   const handleDeleteClick = async (id: string) => {
     try {
-      await deleteEspaco(id);
+      await deleteSapce(id);
     } catch (error) {
-      alert("Algo deu errado!");
+      console.error("Error:", error);
     }
   };
+
+  const { data: spaces, isLoading: isSpacesLoading } = useQuery({
+    queryKey: ["spaces"],
+    queryFn: GetSpaces,
+  });
 
   return (
     <div className="relative p-4">
@@ -34,14 +44,17 @@ export default function EspacosPage() {
         Esta é a página para gestão de espaços. Você pode adicionar, editar ou
         remover espaços.
       </p>
-
-      {espacos.length === 0 ? (
-        <div className='flex justify-center items-center h-64'>
-          <p className='text-lg text-gray-500'>Nenhum espaço encontrado</p>
+      {isSpacesLoading ? (
+        <div className="flex justify-center items-center h-screen">
+          <LoaderCircle size={24} className="animate-spin" />
+        </div>
+      ) : !spaces || spaces.length === 0 ? (
+        <div className="flex justify-center items-center h-64">
+          <h2>Ainda não existem espacos cadastrados</h2>
         </div>
       ) : (
         <ul className="mt-4 space-y-2">
-          {espacos.map((item) => (
+          {spaces.map((item) => (
             <li
               key={item.id}
               className="p-4 border border-white rounded shadow-sm flex justify-between items-center"
@@ -51,7 +64,12 @@ export default function EspacosPage() {
                 <Link href={`/area/espacos/${item.id}`}>
                   <Button variant="outline">Editar</Button>
                 </Link>
-                <Button variant="link" onClick={() => handleDeleteClick(item.id)}>Excluir</Button>
+                <Button
+                  variant="link"
+                  onClick={() => handleDeleteClick(item.id ? item.id : "")}
+                >
+                  Excluir
+                </Button>
                 <Link href={`/area/espacos/${item.id}`}>
                   <Button variant="link">Reservar</Button>
                 </Link>
@@ -61,24 +79,9 @@ export default function EspacosPage() {
         </ul>
       )}
 
-      {showEspacoCard && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
-          <div className="relative z-10 flex flex-col items-center justify-center">
-            <Button
-              className="h-7 w-7 p-0 absolute top-2 right-2 text-white rounded-full z-20"
-              variant="ghost"
-              onClick={handleClose}
-            >
-              <X size={15} />
-            </Button>
-            <div className="w-full h-full flex items-center justify-center">
-              <EspacoCard onClose={handleClose} />
-            </div>
-          </div>
-        </div>
-      )}
+      <EspacoCard openModal={openModal} setOpenModal={setOpenModal} />
 
-      <AddButton onClick={handleAddClick} />
+      <AddButton onClick={() => setOpenModal(true)} />
     </div>
   );
 }

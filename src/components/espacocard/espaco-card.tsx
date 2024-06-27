@@ -1,13 +1,9 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
   CardFooter,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
+import * as Dialog from "@radix-ui/react-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -23,10 +19,15 @@ import { useState } from "react";
 import { z } from "zod";
 import { fetchWrapper } from "@/lib/fetch";
 import Image from "next/image";
-import { getAuthToken } from "@/auth/cookie-auth";
+import { toast } from "sonner";
+import { X } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { CreateSpace } from "@/http/create-space";
+import { SpaceResponseData } from "@/http/get-spaces";
 
-interface EspacoCardProps {
-  onClose: () => void;
+interface CreateSpaceModalProps {
+  setOpenModal: (value: boolean) => void;
+  openModal: boolean;
 }
 
 const addCoworkingSpaceSchema = z.object({
@@ -42,7 +43,7 @@ const addCoworkingSpaceSchema = z.object({
 
 type CoworkingSpaceSchema = z.infer<typeof addCoworkingSpaceSchema>;
 
-export function EspacoCard({ onClose }: EspacoCardProps) {
+export function EspacoCard({ openModal, setOpenModal }: CreateSpaceModalProps) {
   const [selectedImage, setSelectedImage] = useState("");
   const [selectedFile, setSelectedFile] = useState<File>();
 
@@ -55,23 +56,32 @@ export function EspacoCard({ onClose }: EspacoCardProps) {
   } = useForm<CoworkingSpaceSchema>({
     resolver: zodResolver(addCoworkingSpaceSchema),
   });
+  const queryClient = useQueryClient();
+  const { mutateAsync: createSpace } = useMutation({
+    mutationFn: CreateSpace,
+    async onSuccess (_, data) {
+      const cashed = queryClient.getQueryData<SpaceResponseData[]>(["spaces"]);
+      if (cashed) {
+        queryClient.setQueryData<SpaceResponseData[]>(
+          ["spaces"],
+          [...cashed, data]
+        );
+      }
+      setOpenModal(false);
+    },
+    onError: (error) => {
+      console.error("Error:", error);
+      toast.error("Erro ao criar espaço");
+    },
+  
+  });
 
   const handleRegisterSpace = async (data: CoworkingSpaceSchema) => {
     if (!selectedFile) return;
     const formData = new FormData();
     formData.append("myImage", selectedFile);
-    const token = await getAuthToken();
-    const init: RequestInit = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    };
     try {
-      const { id }: any = await fetchWrapper("/api/coworking", init);
-
+      const { id } = await createSpace(data);
       await fetchWrapper(`/api/coworking/save-image-coworking`, {
         method: "POST",
         headers: {
@@ -79,100 +89,113 @@ export function EspacoCard({ onClose }: EspacoCardProps) {
         },
         body: formData,
       });
+      toast.success("Espaço criado com sucesso");
     } catch (error) {
       console.error("Error:", error);
     }
-    onClose();
   };
-  return (
-    <Card className="w-[350px]">
-      <CardHeader>
-        <CardTitle>Criar novo espaço</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(handleRegisterSpace)}>
-          <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="image">Imagem</Label>
-                <Input
-                  type="file"
-                  hidden
-                  onChange={({ target }) => {
-                    if (target.files) {
-                      const file = target.files[0];
-                      setSelectedImage(URL.createObjectURL(file));
-                      setSelectedFile(file);
-                      setValue("image", file);
-                    }
-                  }}
-                />
 
-                {errors.image && <span>{errors.image.message}</span>}
-                {selectedImage && (
-                  <Image
-                    src={selectedImage}
-                    width={400}
-                    height={400}
-                    alt="Preview"
-                    className="mt-2 max-h-64"
+  return (
+    <>
+      <Dialog.Root open={openModal}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed w-screen h-screen inset-0 bg-black/50" />
+          <Dialog.Content className="w-[400px] rounded py-5 flex flex-col items-center bg-card fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30">
+            <div className="flex justify-between my-5">
+              <Dialog.Close
+                onClick={() => setOpenModal(false)}
+                className="absolute bg-transparent border-spacing-0 top-5 right-5 text-gray-300 line-through "
+              >
+                <X size={24} color="#f2f2f2" />
+              </Dialog.Close>
+              <Dialog.Title className="text-gray-300 font-semibold text-xl">
+                Criar Espaço
+              </Dialog.Title>
+            </div>
+            <form onSubmit={handleSubmit(handleRegisterSpace)}>
+              <div className="grid w-full items-center gap-4">
+                <div className="flex flex-col space-y-1.5">
+                  <div className="flex flex-col space-y-1.5">
+                    <Label htmlFor="image">Imagem</Label>
+                    <Input
+                      type="file"
+                      hidden
+                      onChange={({ target }) => {
+                        if (target.files) {
+                          const file = target.files[0];
+                          setSelectedImage(URL.createObjectURL(file));
+                          setSelectedFile(file);
+                          setValue("image", file);
+                        }
+                      }}
+                    />
+                    {errors.image && <span>{errors.image.message}</span>}
+                    {selectedImage && (
+                      <Image
+                        src={selectedImage}
+                        width={350}
+                        height={350}
+                        alt="Preview"
+                        className="mt-2 max-h-64"
+                      />
+                    )}
+                  </div>
+                  <Label htmlFor="name">Nome</Label>
+                  <Input
+                    {...register("name")}
+                    id="name"
+                    placeholder="Nome do espaço"
+                    type="text"
                   />
-                )}
+                  {errors.name && <span className="text-red-500">{errors.name.message}</span>}
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="espaco">Tipo de Espaço</Label>
+                  <Controller
+                    name="type"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger id="espaco">
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                        <SelectContent position="popper">
+                          <SelectItem value="coworking">Coworking</SelectItem>
+                          <SelectItem value="confroom">
+                            Sala de Conferência (indisp.)
+                          </SelectItem>
+                          <SelectItem value="estacionamento">
+                            Estacionamento (indisp.)
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.type && <span>{errors.type.message}</span>}
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="seat">Assentos</Label>
+                  <Input
+                    {...register("seat")}
+                    id="seat"
+                    placeholder="Numero de assentos"
+                    type="number"
+                  />
+                  {errors.seat && <span className="text-red-500">{errors.seat.message}</span>}
+                </div>
+                <CardFooter className="flex items-center justify-items-center mt-4">
+                  <Button type="submit" className="w-full">
+                    Criar
+                  </Button>
+                </CardFooter>
               </div>
-              <Label htmlFor="name">Nome</Label>
-              <Input
-                {...register("name")}
-                id="name"
-                placeholder="Nome do espaço"
-                type="text"
-              />
-              {errors.name && <span>{errors.name.message}</span>}
-            </div>
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="espaco">Tipo de Espaço</Label>
-              <Controller
-                name="type"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <SelectTrigger id="espaco">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent position="popper">
-                      <SelectItem value="coworking">Coworking</SelectItem>
-                      <SelectItem value="confroom">
-                        Sala de Conferência (indisp.)
-                      </SelectItem>
-                      <SelectItem value="estacionamento">
-                        Estacionamento (indisp.)
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.type && <span>{errors.type.message}</span>}
-            </div>
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="seat">Assentos</Label>
-              <Input
-                {...register("seat")}
-                id="seat"
-                placeholder="Numero de assentos"
-                type="number"
-              />
-              {errors.seat && <span>{errors.seat.message}</span>}
-            </div>
-            <CardFooter className="flex items-center justify-items-center mt-4">
-              <Button type="submit" className="w-full">
-                Criar
-              </Button>
-            </CardFooter>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+            </form>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+    </>
   );
 }

@@ -12,49 +12,56 @@ import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { fetchWrapper } from "@/lib/fetch";
 import { getCookie } from "cookies-next";
+import { api } from "@/http/api-client";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { CreateUser } from "@/http/create-user";
+import { queryClient } from "@/lib/react-query";
+import { UsersResponseData } from "@/http/get-users";
 
 interface UserCardProps {
   onClose: () => void;
 }
-
 
 const registrationSchema = z.object({
   name: z.string().min(1, { message: "Nome obrigatório" }),
   startupName: z.string().min(1, { message: "Nome da Startup obrigatório" }),
   phone: z.string().min(1, { message: "Telefone obrigatório" }),
   email: z.string().email({ message: "Email inválido" }),
-  imageUrl: z.string().optional(), 
+  imageUrl: z.string().optional(),
 });
 
 type RegistrationSchema = z.infer<typeof registrationSchema>;
 
 export function UserCard({ onClose }: UserCardProps) {
   const {
-    control,
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<RegistrationSchema>({
     resolver: zodResolver(registrationSchema),
   });
+  const { mutateAsync: createUser } = useMutation({
+    mutationFn: CreateUser,
+    onSuccess(_, data) {
+      const cashed = queryClient.getQueryData<UsersResponseData[]>(["users"]);
+      if (cashed) {
+        queryClient.setQueryData<any[]>(
+          ["users"],
+          [...cashed, data]
+        );
+      }
+    },
+  });
 
   const handleRegisterUser = async (data: RegistrationSchema) => {
-    console.log(data);
-    
-    const init: RequestInit = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${getCookie("token")}`,
-      },
-      body: JSON.stringify(data),
-    }
     try {
-        await fetchWrapper("/api/users", init);
+      await createUser(data);
+      toast.success("Usário criado com sucesso");
     } catch (error) {
       console.error("Error:", error);
+      toast.error("Erro ao criar o usuário");
     }
     onClose();
   };
@@ -62,10 +69,12 @@ export function UserCard({ onClose }: UserCardProps) {
   return (
     <Card className="w-[400px] rounded border-none">
       <CardHeader>
-        <CardTitle className="text-center text-gray-300 text-xl">Registrar Nova Startup</CardTitle>
+        <CardTitle className="text-center text-gray-300 text-xl">
+          Registrar Nova Startup
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(handleRegisterUser)} >
+        <form onSubmit={handleSubmit(handleRegisterUser)}>
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">Nome</Label>
@@ -118,7 +127,9 @@ export function UserCard({ onClose }: UserCardProps) {
               {errors.imageUrl && <span>{errors.imageUrl.message}</span>}
             </div>
             <CardFooter className="max-w-full">
-              <Button type="submit" className="w-full">Registrar</Button>
+              <Button type="submit" className="w-full">
+                Registrar
+              </Button>
             </CardFooter>
           </div>
         </form>

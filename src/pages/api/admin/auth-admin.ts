@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
 import AuthService from '@/auth/auth.service';
+import { UserAlreadyExistsError } from '@/pages/erros/UserAlreadyExistsError';
 
 type ResponseData = {
   message?: string;
@@ -35,12 +36,6 @@ export default async function handler(
       return res.status(401).json({ message: 'Email ou senha inválido' });
     }
 
-    // const token = jwt.sign(
-    //   { userId: user.id, role: user.role }, 
-    //   process.env.JWT_SECRET || 'default_secret',
-      
-    //   { expiresIn: '7h', algorithm: 'HS256' } 
-    // );
     
     await AuthService.createSessionToken({ userId: user.id, role: user.role }, req, res);
 

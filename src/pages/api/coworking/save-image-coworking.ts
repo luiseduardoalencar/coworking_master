@@ -40,10 +40,11 @@ const handler: NextApiHandler = async (req, res) => {
     await prisma.imageCoworking.create({
       data: {
         coworkingId: req.headers.id as string,
-        imagePath:files.myImage && files.myImage[0].newFilename,
+        imagePath: files.myImage && files.myImage[0].newFilename,
       }
     })
   } catch (error) {
+    console.error(error);
     await fs.mkdir(path.join(process.cwd() + "/public", "/images"));
   }
   await readFile(req, true);

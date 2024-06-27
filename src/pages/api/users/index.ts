@@ -1,36 +1,53 @@
-import { prisma } from '@/lib/prisma'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { prisma } from "@/lib/prisma";
+import { UserAlreadyExistsError } from "../../erros/UserAlreadyExistsError";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 type ResponseData = {
-  id: string
-}
+  id?: string;
+  message?: string;
+};
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
 ) {
-  if (req.method !== 'POST') {
-    return res.status(405).end()
+  if (req.method !== "POST") {
+    return res.status(405).end();
   }
 
-  const token = req.headers.authorization
-  console.log(token), "AUTHOR";
-  
-  const { name, email, imageUrl, startupName, phone } = req.body
+  const token = req.headers.authorization;
 
+  if (!token) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
 
-  const result = await prisma.user.create({
+  const { name, email, imageUrl, startupName, phone } = req.body;
 
-    data: {
-      name,
-      email,
-      imageUrl,
-      startupName, 
-      phone       
-    },
-    select:{
-      id:true,
+  try {
+    const userAlreadyExists = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (userAlreadyExists) {
+      throw new UserAlreadyExistsError({message: "User already exists", statusCode: 400});
     }
-  })
-  return res.status(201).json(result)
+
+    const result = await prisma.user.create({
+      data: {
+        name,
+        email,
+        imageUrl,
+        startupName,
+        phone,
+      },
+      select: {
+        id: true,
+      },
+    });
+    return res.status(201).json(result);
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
 }

@@ -7,9 +7,11 @@ import { z } from "zod";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { fetchWrapper } from "@/lib/fetch";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { UpdateUser, UsersRequestData } from "@/http/update-user";
 
 const userSchemaBody = z.object({
-  id: z.string().optional(),
+  id: z.string().optional().nullable(),
   name: z.string(),
   phone: z.string().optional(),
   email: z.string().email({ message: "Email inválido" }),
@@ -47,35 +49,37 @@ export const EditUserModal = ({
     },
   });
 
+  const queryClient = useQueryClient();
+  const { mutateAsync: updateUser } = useMutation({
+    mutationFn: UpdateUser,
+    async onSuccess(_, data) {
+      queryClient.setQueryData<UsersRequestData[]>(["users"], (oldData:any) => {
+        if (!oldData) return [];
+        return oldData.map((userData:any) =>
+          userData.id === user.id
+            ? { ...userData, name: data.name }
+            : userData
+        );
+      });
+    },
+  });
+
   const handleEditUserForm = async (data: UserSchema) => {
-    const init: RequestInit = {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    try {
+      await updateUser({
         name: data.name,
         phone: data.phone,
         email: data.email,
         imageUrl: data.imageUrl,
         startupName: data.startupName,
-        id: user.id,
-      }),
-    };
-    try {
-      await fetchWrapper("/api/users/update-user", init);
+        id: user.id
+      });
       setOpenModal(false);
     } catch (error) {
       console.error("Error:", error);
     }
   };
 
-  // const handleDeleteAddress = async (id: string) => {
-  //   await serviceAddress.deleteAddress({ id });
-  //   const newAddresses = addresses.filter(item => item.id !== id);
-  //   setAddresses(newAddresses);
-  //   setOpenModal(false);
-  // }
 
   return (
     <>
@@ -131,7 +135,7 @@ export const EditUserModal = ({
               />
               <Button
                 onClick={() => setOpenModal(true)}
-                className="w-full bg-blue-500 mt-5 hover:bg-red-400"
+                className="w-full bg-blue-500 "
                 type="submit"
               >
                 {" "}

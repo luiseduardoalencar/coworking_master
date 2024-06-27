@@ -1,6 +1,6 @@
 "use client";
 
-import {  Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/http/api-client";
 import { HTTPError } from "ky";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { signUp } from "@/http/sign-up";
 
 const schemaSignUp = z.object({
   email: z
@@ -40,6 +43,10 @@ export default function SignUp() {
     resolver: zodResolver(schemaSignUp),
   });
 
+  const {mutateAsync: createAdmin} = useMutation({
+    mutationFn: signUp,
+  })
+
   const handleSignUp = async (data: SchemaSignUp) => {
     try {
       if (data.password !== data.confirmPassword) {
@@ -47,20 +54,23 @@ export default function SignUp() {
           message: "As senhas devem ser iguais",
         });
       }
-  
-      await api.post("/api/admin/create-admin", {
-        method: "POST",
-         json: data,
-      }).json();
+      await createAdmin(data)
+      toast.success("Usuario criado com sucesso!");
+      router.push("/auth/sign-in");
     } catch (error) {
       if (error instanceof HTTPError) {
-        return setError("root", {
-          message: error.message,
+        const { message } = await error.response.json();
+        console.log(message);
+        setError("root", {
+          message: message || "Erro desconhecido",
+        });
+      } else {
+        setError("root", {
+          message:
+            "Erro ao tentar autenticar. Por favor, tente novamente mais tarde.",
         });
       }
     }
-
-    router.push("/auth/sign-in");
   };
 
   return (
@@ -119,7 +129,7 @@ export default function SignUp() {
             </p>
           )}
           {errors.root && (
-            <span className="text-xs font-medium text-red-500 dark:text-red-400">
+            <span className="text-xs flex items-center justify-center mt-4 font-medium text-red-500 dark:text-red-400">
               {errors.root?.message}
             </span>
           )}

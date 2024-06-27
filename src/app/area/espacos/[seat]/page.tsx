@@ -2,7 +2,9 @@
 
 import { ReserveModalSeat } from "@/components/reserve-modal-seat";
 import { Button } from "@/components/ui/button";
+import { GetSeats } from "@/http/get-seats";
 import { fetchWrapper } from "@/lib/fetch";
+import { useQuery } from "@tanstack/react-query";
 import { LoaderCircle, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -23,7 +25,6 @@ interface ResponseSeats {
 }
 
 export default function ReservasDisponiveis({params}: Props) {
-  const [seats, setSeats] = useState<ResponseSeats[]>([]);
   const [showModalSeat, setShowModalSeat] = useState(false);
   const [selectedSeatId, setSelectedSeatId] = useState<string>('');
   const [imagePath, setImagePath] = useState<ResponseImagePath>();
@@ -38,19 +39,18 @@ export default function ReservasDisponiveis({params}: Props) {
     setShowModalSeat(false);
   };
 
+  const { data: seats, isLoading: isSeatsLoading } = useQuery({
+    queryKey: ["seats"],
+    queryFn: () => GetSeats({ spaceId: params.seat }),
+  });
+
   const getSeats = async () => {
     try {
-      const response = await fetchWrapper<ResponseSeats[]>(`/api/coworking/get-seats`, {
-        headers: {
-          'coworkingId': params.seat
-        }
-      });
       const imagePath = await fetchWrapper<ResponseImagePath>('/api/coworking/get-image-coworking', {
         headers: {
           'coworkingId': params.seat
         }
       });
-      setSeats(response);
       setImagePath(imagePath);
     } catch (error) {
       console.error("Failed to fetch espacos:", error);
@@ -74,11 +74,15 @@ export default function ReservasDisponiveis({params}: Props) {
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <div className="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-5 gap-2 justify-items-center">
-              {seats.map((seat) => (
-                <Button onClick={() => handleAddClick(seat.id)} key={seat.id} className="bg-transparent hover:bg-transparent"> 
-                  <div className={`w-7 h-7 flex items-center justify-center rounded-full ${seat.busy ? 'bg-blue-500' : 'bg-gray-100'}`}>{seat.seatNumber}</div>
-                </Button>
-              ))}
+              {isSeatsLoading ? (
+                <LoaderCircle size={24} className="animate-spin"/>
+              ) : (
+                seats?.map((seat) => (
+                  <Button onClick={() => handleAddClick(seat.id)} key={seat.id} className="bg-transparent hover:bg-transparent"> 
+                    <div className={`w-7 h-7 flex items-center justify-center rounded-full ${seat.busy ? 'bg-blue-500' : 'bg-gray-100'}`}>{seat.seatNumber}</div>
+                  </Button>
+                ))
+              )}
             </div>
           </div>
           {imagePath && (

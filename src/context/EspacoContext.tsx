@@ -16,7 +16,7 @@ interface EspacoData {
 interface EspacoContextProps {
   espacos: EspacoData[];
   setEspacos: React.Dispatch<React.SetStateAction<EspacoData[]>>;
-  deleteEspaco: (id: string) => Promise<void>;
+  deleteEspaco: (id?: string) => Promise<void>;
 }
 
 const EspacoContext = createContext<EspacoContextProps | undefined>(undefined);
@@ -33,7 +33,7 @@ export const EspacoProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const deleteEspaco = async (id: string) => {
+  const deleteEspaco = async (id?: string) => {
     try {
       const response = await fetchWrapper<{ message: string }>("/api/coworking/delete-coworking", {
         method: 'DELETE',

@@ -1,18 +1,21 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import { UserCard } from "@/components/usercard/user-card";
 import { AddButton } from "@/components/addbutton/addbutton";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import { useUser } from "@/context/UserContext";
 import { DeleteButton } from "@/components/deletebutton/deletebutton";
 import { EditUserModal } from "@/components/edit-user-modal/";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getUsers } from "@/http/get-users";
+import { DeleteUser } from "@/http/delete-user";
+import { toast } from "sonner";
 
 export default function UserPage() {
   const [showUserCard, setShowUserCard] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
-  const { users, setUsers } = useUser();
+
   const [openModal, setOpenModal] = useState(false);
 
   const handleAddClick = () => {
@@ -24,24 +27,22 @@ export default function UserPage() {
     setSelectedUser(null);
     setEditingUser(null);
   };
+  const queryClient = useQueryClient();
 
-  const handleDeleteUser = async (userId: string) => {
-    try {
-      const response = await fetch(`/api/users/delete-user?id=${userId}`, {
-        method: 'DELETE',
-      });
-      if (response.ok) {
-        console.log("Usuário deletado com sucesso");
-        setUsers(users.filter(user => user.id !== userId));
-      } else {
-        console.error('Erro ao deletar usuário');
-      }
-    } catch (error) {
-      console.error('Erro ao fazer a requisição de exclusão:', error);
-    }
-  };
+  const { data: users, isLoading: isUsersLoading } = useQuery({
+    queryKey: ["users"],
+    queryFn: getUsers,
+  });
 
-   return (
+  const { mutateAsync: deleteUser } = useMutation({
+    mutationFn: DeleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      toast.success("Usário removido com sucesso");
+    },
+  });
+
+  return (
     <div className="relative p-4">
       <h1 className="text-3xl font-semibold">Usuários</h1>
       <p>
@@ -49,31 +50,37 @@ export default function UserPage() {
         remover usuários.
       </p>
 
-      <ul className="mt-4 space-y-2">
-       {users ?
-        users.map((item) => (
-          
+      {isUsersLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <h2>Carregando usuários...</h2>
+        </div>
+      ) : !users || users.length === 0 ? (
+        <div className="flex justify-center items-center h-64">
+          <h2>Ainda não existem usuários cadastrados</h2>
+        </div>
+      ) : (
+        <ul className="mt-4 space-y-2">
+          {users.map((item) => (
             <li
               key={item.id}
               className="p-4 border border-gray-400 rounded shadow-sm flex justify-between items-center cursor-pointer"
-              
             >
               <span>{item.name}</span>
               <div className="flex space-x-2">
-                <Button variant="outline" onClick={() => setOpenModal(true)}>Editar</Button>
-                <DeleteButton onClick={() => handleDeleteUser(item.id)} />
+                <Button variant="outline" onClick={() => setOpenModal(true)}>
+                  Editar
+                </Button>
+                <DeleteButton onClick={() => deleteUser(item.id)} />
               </div>
-              <EditUserModal user={item} openModal={openModal} setOpenModal={setOpenModal}  />
+              <EditUserModal
+                user={item}
+                openModal={openModal}
+                setOpenModal={setOpenModal}
+              />
             </li>
-          
-        ))
-       : 
-       <div className="flex justify-center items-center">
-          <h2>Nenhum usuário encontrado</h2>
-
-       </div>
-      }
-      </ul>
+          ))}
+        </ul>
+      )}
 
       {showUserCard && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -91,7 +98,6 @@ export default function UserPage() {
           </div>
         </div>
       )}
-
 
       <AddButton onClick={handleAddClick} />
     </div>
